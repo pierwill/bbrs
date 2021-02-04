@@ -19,7 +19,8 @@ fn main() {
         .expect("err")
         .next()
         .unwrap();
-
+    println!("{:#?}", p);
+    
     let _term = parse_term(p);
     println!("{:#?}", _term);
 
@@ -27,15 +28,35 @@ fn main() {
 
 fn parse_term(p: Pair<'_, Rule>) -> Term {
     let inner_pair = p.into_inner();
-    let first_str_of_inner = inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[0];
-    match first_str_of_inner {
+    let first_str = inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[0];
+
+    match first_str {
+        "if" => parse_if(inner_pair).unwrap(),
         "true" => Term::TmTrue,
         "false" => Term::TmFalse,
-        "if" => Term::TmIf(_,_,_),
+        _ => panic!(),
     }
 }
 
-// fn parse_if(t: Term) -> Option(Term) {}
+fn parse_if(p: Pairs<'_, Rule>) -> Option<Term> {
+
+    // "if cond then csq else alt"
+    let conditional_str_parts = Pairs::single(p).as_str().split_whitespace().collect::<Vec<_>>();
+
+    let cond = Term::from_str(
+        conditional_str_parts[1]
+    );
+    debug_assert_eq!(conditional_str_parts[3], "then");
+    let csq = Term::from_str(
+        conditional_str_parts[3]
+    );
+    debug_assert_eq!(conditional_str_parts[5], "else");
+    let alt = Term::from_str(
+        conditional_str_parts[5]
+    );
+    
+    Some(Term::TmIf(Box::new(cond), Box::new(csq), Box::new(alt)))
+}
 
 // fn evaluate(t: Term) -> Result<Term, RuntimeError> {
 //     let r = match t {
@@ -50,19 +71,30 @@ pub enum Term {
     TmIf(Box<Term>, Box<Term>, Box<Term>),
 }
 
+impl Term {
+    fn from_str(s: &str) -> Self {
+        match s {
+            "true" => Term::TmTrue,
+            "false" => Term::TmFalse,
+            _ => panic!(),
+        }
+    }
+}
+
+
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub enum RuntimeError {
     NoRuleApplies,
 }
 
-    // fn parse_if(&mut self) -> Option<Term> {
-    //     let cond = self.parse_term()?;
-    //     let _ = self.expect(Token::Then)?;
-    //     let csq = self.parse_term()?;
-    //     let _ = self.expect(Token::Else)?;
-    //     let alt = self.parse_term()?;
-    //     Some(Term::TmIf(Box::new(cond), Box::new(csq), Box::new(alt)))
-    // }
+// fn parse_if(&mut self) -> Option<Term> {
+//     let cond = self.parse_term()?;
+//     let _ = self.expect(Token::Then)?;
+//     let csq = self.parse_term()?;
+//     let _ = self.expect(Token::Else)?;
+//     let alt = self.parse_term()?;
+//     Some(Term::TmIf(Box::new(cond), Box::new(csq), Box::new(alt)))
+// }
 
 /*
 pub fn eval1(t: Term) -> Result<Term, RuntimeError> {
@@ -88,16 +120,6 @@ pub fn eval(t: Term) -> Term {
     r
 }
 
-fn main() {
-    println!("λ");
-    let input = "if iszero(succ(zero)) then false else succ(4)";
-    let mut p = Parser::new(input);
-    while let Some(tm) = p.parse_term() {
-        print!("{:?} ==> ", tm);
-        println!("{:?}", eval(tm));
-    }
-}
-
 */
 
 #[cfg(test)]
@@ -107,7 +129,6 @@ mod tests {
     #[test]
     fn test_parse_term() {
         let src: &str = "false";
-        // let src: &str = "if true then true else false";
         let p = NbParser::parse(Rule::term, &src)
             .expect("err")
             .next()
@@ -116,4 +137,19 @@ mod tests {
         let term = parse_term(p);
         assert_eq!(term, Term::TmFalse);
     }
+
+    #[test]
+    fn test_parse_if() {
+        let src: &str = "if true then true else false";
+        let p = NbParser::parse(Rule::term, &src)
+            .expect("err")
+            .next()
+            .unwrap();
+
+        let term = parse_if(p);
+        assert_eq!(term, Some(Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse))));
+    }
+
+
+
 }
