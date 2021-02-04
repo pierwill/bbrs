@@ -8,6 +8,6 @@ tvar = @{ "t" ~ ASCII_DIGIT+ }
 
 assignment = { tvar ~ "=" ~ value }
 
-term = { value | tvar | conditional }
+term = { value | conditional | assignment | tvar }
 
-statement = { assignment | term | tvar }
+statement = { term | assignment | tvar }
