@@ -13,7 +13,9 @@ conditional = { "if" ~ term ~ "then" ~ term ~  "else" ~ term  }
 term = { value | conditional }
 ```
 
-The idea is a working, extensible interprer that'll do something like this:
+At the moment this project is about nine parts ambition to one part code.
+
+The idea is to produce a working, extensible interprer that'll do something like this:
 
 ```
 >> true
