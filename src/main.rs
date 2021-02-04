@@ -5,7 +5,7 @@ extern crate pest;
 extern crate pest_derive;
 
 #[allow(unused)]
-use pest::{Parser, iterators::Pair};
+use pest::{Parser, iterators::{Pair, Pairs}};
 
 #[derive(Parser)]
 #[grammar = "nb.pest"]
@@ -13,29 +13,33 @@ struct NbParser;
 
 fn main() {
 
-    let inputs: Vec<&str> = vec![
-        "true",
-        "false",
-        "t3 = true",
-        "t1989",
-        "if t1 then t2 else t3",
-    ];
+    let src: &str = "false";
+    // let src: &str = "if true then true else false";
+    
+    let p = NbParser::parse(Rule::term, &src)
+        .expect("err")
+        .next()
+        .unwrap();
 
-    for input in inputs {
+    // Get the first inner pair.
+    // What kind of term is it?
+    let inner: Pairs<'_, Rule> = p.into_inner();
 
-        let p = NbParser::parse(Rule::statement, &input)
-            .expect("err")
-            .next()
-            .unwrap();
+    // What kind of rule is the first inner pair (term)?
+    let inner_rule = inner.peek().unwrap().as_rule();
 
-        let p2 = p.clone().into_inner().next().unwrap();
-        let p3 = p2.clone().into_inner().next().unwrap();
-        let p4 = p3.clone().into_inner().next(); // don't unwrap None
+    // Match the rule.
+    let m = match inner_rule {
+        
+        // If it is a value, return the value.
+        Rule::value => unimplemented!(),
+        
+        // If it is a conditional, evaluate it.
+        Rule::conditional => unimplemented!(),
 
-        println!("{:?}", input);
-        println!("{:?}", p.as_rule());
-        println!("{:?}", p2.as_rule());
-        println!("{:?}:{}", p3.as_rule(), p3.as_str());
-        println!("{:?}\n", p4);
-    }
+        // None applies.
+        _ => unimplemented!()
+    };
+
+    println!("{:#?}", m)
 }
