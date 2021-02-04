@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
@@ -8,32 +10,15 @@ use pest::Parser;
 #[grammar = "nb.pest"]
 struct NbParser;
 
-const SEPARATOR: &str = "\n----------------------------------\n";
-
-fn main() {
-    let input = "false";
-    let p = NbParser::parse(Rule::statement, &input)
-        .expect("err")
-        .next()
-        .unwrap();
-    let inner_rules = p.into_inner();
-    println!("Input: \"{}\"\n\n{:#?}", input, inner_rules);
-
-    println!("{}", SEPARATOR);
-
-    let input2 = "t1 = true";
-    let p2 = NbParser::parse(Rule::statement, &input2)
-        .expect("err")
-        .next()
-        .unwrap();
-    println!("Input: \"{}\"\n\n{:#?}", input2, p2);
-}
+fn main() {}
 
 struct Assignment {
     // eg "t1"
-    tvar: &str,
+    tvar: &'static str,
     val: Value,
 }
+
+impl Assignment {}
 
 struct Term {
     kind: TmKind,
@@ -49,61 +34,104 @@ enum Value {
     FALSE,
 }
 
-// fn eval(input: &str) -> &str {
-//     let p = NbParser::parse(Rule::statement, &input)
-//         .expect("err")
-//         .next()
-//         .unwrap();
-//     let mut inner_rules = p.into_inner();
-//     // if inner_rules.next().unwrap().as_rule() == Rule::assignment {}
-//     let TT = inner_rules.next().unwrap().as_str();
-//     if TT == String::from("true") {}
-// }
-// fn assign() ->
+enum AstNode(
+    Assignment,
+    Term,
+    TmKind,
+    Value,
+)
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub fn parse(source: &str) -> Result<Vec<AstNode>, Error<Rule>> {
+    let mut ast = vec![];
 
-    #[test]
-    fn test_term() {
-        let input = "true";
-        let p = NbParser::parse(Rule::statement, &input)
-            .expect("err")
-            .next()
-            .unwrap();
-
-        assert_eq!(p.into_inner().as_str(), "true");
+    let pairs = NbParser::parse(Rule::program, &source)?;
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::expr => {
+                ast.push(Print(Box::new(build_ast_from_statement(pair))));
+            }
+            _ => {}
+        }
     }
 
-    #[test]
-    fn test_term2() {
-        let input = "true";
-        let p = NbParser::parse(Rule::statement, &input)
-            .expect("err")
-            .next()
-            .unwrap();
-        
-        assert_eq!(p.into_inner().next().unwrap().as_rule(), Rule::term);
-    }
-    
-    #[test]
-    fn test_assignment_str() {
-        let input = "t1 = true";
-        let p = NbParser::parse(Rule::statement, &input)
-            .expect("err")
-            .next()
-            .unwrap();
-        assert_eq!(p.into_inner().as_str(), "t1 = true");
-    }
+    Ok(ast)
+}
 
-    #[test]
-    fn test_assignment_rule() {
-        let input = "t1 = true";
-        let p = NbParser::parse(Rule::statement, &input)
-            .expect("err")
-            .next()
-            .unwrap();
-        assert_eq!(p.into_inner().next().unwrap().as_rule(), Rule::assignment);
+fn build_ast_from_statement(pair: pest::iterators::Pair<Rule>) -> AstNode {
+    match pair.as_rule() {
+        Rule::statement => build_ast_from_statement(pair.into_inner().next().unwrap()),
+        Rule::value => {
+            let mut pair = pair.into_inner();
+            let val = pair.next().unwrap().as_str;
+            
+        }
+        Rule::monadicExpr => {
+            let mut pair = pair.into_inner();
+            let verb = pair.next().unwrap();
+            let expr = pair.next().unwrap();
+            let expr = build_ast_from_statement(expr);
+            parse_monadic_verb(verb, expr)
+        }
+        // ... other cases elided here ...
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     #[test]
+//     fn test_term() {
+//         let input = "true";
+//         let p = NbParser::parse(Rule::statement, &input)
+//             .expect("err")
+//             .next()
+//             .unwrap();
+
+//         assert_eq!(p.into_inner().as_str(), "true");
+//     }
+
+//     #[test]
+//     fn test_term2() {
+//         let input = "true";
+//         let p = NbParser::parse(Rule::statement, &input)
+//             .expect("err")
+//             .next()
+//             .unwrap();
+
+//         assert_eq!(p.into_inner().next().unwrap().as_rule(), Rule::term);
+//     }
+
+//     #[test]
+//     fn test_assignment_str() {
+//         let input = "t1 = true";
+//         let p = NbParser::parse(Rule::statement, &input)
+//             .expect("err")
+//             .next()
+//             .unwrap();
+//         assert_eq!(p.into_inner().as_str(), "t1 = true");
+//     }
+
+//     #[test]
+//     fn test_assignment_rule() {
+//         let input = "t1 = true";
+//         let p = NbParser::parse(Rule::statement, &input)
+//             .expect("err")
+//             .next()
+//             .unwrap();
+//         assert_eq!(p.into_inner().next().unwrap().as_rule(), Rule::assignment);
+//     }
+
+//     #[test]
+//     fn test_val() {
+//         let input = "true";
+//         let p = NbParser::parse(Rule::statement, &input)
+//             .expect("err")
+//             .next()
+//             .unwrap();
+//         assert_eq!(
+//             String::from(p.into_inner().next().unwrap().as_str()),
+//             eval_t(input)
+//         );
+//     }
+// }
