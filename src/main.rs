@@ -12,8 +12,8 @@ use pest::{Parser, iterators::{Pair, Pairs}};
 struct NbParser;
 
 fn main() {
-    let src: &str = "false";
-    // let src: &str = "if true then true else false";
+    // let src: &str = "false";
+    let src: &str = "if true then true else false";
 
     let p = NbParser::parse(Rule::term, &src)
         .expect("err")
@@ -41,16 +41,16 @@ fn parse_term(p: Pair<'_, Rule>) -> Term {
 fn parse_if(p: Pairs<'_, Rule>) -> Option<Term> {
 
     // "if cond then csq else alt"
-    let conditional_str_parts = Pairs::single(p).as_str().split_whitespace().collect::<Vec<_>>();
+    let conditional_str_parts = p.as_str().split_whitespace().collect::<Vec<_>>();
 
     let cond = Term::from_str(
         conditional_str_parts[1]
     );
-    debug_assert_eq!(conditional_str_parts[3], "then");
+    debug_assert_eq!(conditional_str_parts[2], "then");
     let csq = Term::from_str(
         conditional_str_parts[3]
     );
-    debug_assert_eq!(conditional_str_parts[5], "else");
+    debug_assert_eq!(conditional_str_parts[4], "else");
     let alt = Term::from_str(
         conditional_str_parts[5]
     );
@@ -146,7 +146,7 @@ mod tests {
             .next()
             .unwrap();
 
-        let term = parse_if(p);
+        let term = parse_if(Pairs::single(p));
         assert_eq!(term, Some(Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse))));
     }
 
