@@ -1,4 +1,5 @@
-Attempt at a simple language using `pest`, inspired by NB in Chapters 3 and 4 of Pierce, *Types and Programming Languages* (U of Pennsylvania Press, 2002).
+Attempt at a simple language using [`pest`](https://pest.rs),
+inspired by NB in Chapters 3 and 4 of Pierce, *Types and Programming Languages* (U of Pennsylvania Press, 2002).
 
 Currently working on implementing this grammar:
 
