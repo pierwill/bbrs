@@ -1,7 +1,9 @@
 nbrs
 ====
 
-Attempt at a simple language using [`pest`](https://pest.rs), inspired by **𝔹** in Benjamin Pierce, *Types and Programming Languages* (U of Pennsylvania Press, 2002), page 34.
+Attempt at implementing a simple language in Rust using [`pest`](https://pest.rs).
+
+Based on 𝔹 in Benjamin Pierce, *Types and Programming Languages* (U of Pennsylvania Press, 2002), page 34.
 
 Currently working on implementing this grammar:
 
