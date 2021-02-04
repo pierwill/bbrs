@@ -4,7 +4,7 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
-use pest::Parser;
+use pest::{Parser, iterators::Pair};
 
 #[derive(Parser)]
 #[grammar = "nb.pest"]
@@ -34,45 +34,56 @@ enum Value {
     FALSE,
 }
 
-enum AstNode(
+enum AstNode {
     Assignment,
     Term,
     TmKind,
-    Value,
-)
+    Value(Value),
+}
 
-pub fn parse(source: &str) -> Result<Vec<AstNode>, Error<Rule>> {
+pub fn parse(source: &str) -> Result<Vec<AstNode>, pest::error::Error<Rule>> {
     let mut ast = vec![];
 
-    let pairs = NbParser::parse(Rule::program, &source)?;
+    let pairs = NbParser::parse(Rule::statement, &source)?;
     for pair in pairs {
         match pair.as_rule() {
-            Rule::expr => {
-                ast.push(Print(Box::new(build_ast_from_statement(pair))));
+            Rule::statement => {
+                ast.push(build_ast_from_statement(pair));
             }
             _ => {}
         }
     }
-
     Ok(ast)
 }
 
-fn build_ast_from_statement(pair: pest::iterators::Pair<Rule>) -> AstNode {
+fn build_ast_from_statement(pair: Pair<Rule>) -> AstNode {
     match pair.as_rule() {
         Rule::statement => build_ast_from_statement(pair.into_inner().next().unwrap()),
         Rule::value => {
             let mut pair = pair.into_inner();
-            let val = pair.next().unwrap().as_str;
-            
+            let val = pair.next().unwrap().as_str();
+            match val {
+                "true" => AstNode::Value(Value::TRUE),
+                "false" => AstNode::Value(Value::FALSE)
+            }
         }
-        Rule::monadicExpr => {
-            let mut pair = pair.into_inner();
-            let verb = pair.next().unwrap();
-            let expr = pair.next().unwrap();
-            let expr = build_ast_from_statement(expr);
-            parse_monadic_verb(verb, expr)
-        }
-        // ... other cases elided here ...
+        _ => panic!()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_build() {
+        let input = "true";
+        let p = NbParser::parse(Rule::statement, &input)
+            .expect("err")
+            .next()
+            .unwrap();
+
+        assert_eq!(build_ast_from_statement(p), "true");
     }
 }
 
