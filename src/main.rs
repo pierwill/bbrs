@@ -16,8 +16,8 @@ fn main() {
     let inputs: Vec<&str> = vec![
         "true",
         "false",
-        // "t3 = true",
-        // "t1989",
+        "t3 = true",
+        "t1989",
         "if t1 then t2 else t3",
     ];
 
@@ -39,38 +39,3 @@ fn main() {
         println!("{:?}\n", p4);
     }
 }
-
-
-// fn recurse(p: Pair<_>) -> Option<Pair<_>> {
-//     let inner = p.clone().into_inner().next();
-//     let inner_rule = inner.as_rule();
-//     match inner_rule {
-//         Rule::statement => Some(inner),
-//         Rule::term => Some,
-//         Rule::value =>,
-//     }
-// }
-
-// struct Term {
-//     info: &'static str,
-//     kind: TermKind,
-// }
-
-// enum TermKind {
-//     Value(ValueKind),
-//     Conditional,
-//     Assignment,
-// }
-
-// enum ValueKind {
-//     True,
-//     False,
-// }
-
-// enum AstNode {
-//     Value,
-//     Conditional,
-//     Tvar,
-//     Assignment,
-//     Term
-// }
