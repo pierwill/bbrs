@@ -36,7 +36,6 @@ conditional = { "if" ~ term ~ "then" ~ term ~  "else" ~ term  }
 var = @{ "$" ~ ASCII_DIGIT+ }
 assignment = { var ~ "=" ~ value }
 term = { value | conditional | assignment | var }
-statement = { term | assignment | var }
 ```
 
 N.B.:
