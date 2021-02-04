@@ -42,3 +42,8 @@ term = { value | conditional | assignment | var }
 N.B.:
 These are the [parsing expression grammars](https://en.wikipedia.org/wiki/Parsing_expression_grammar), used by `pest`,
 not [Extended Backus–Naur form](https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form).
+
+References
+----------
+
+- https://github.com/lazear/types-and-programming-languages

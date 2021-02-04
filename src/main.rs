@@ -12,34 +12,108 @@ use pest::{Parser, iterators::{Pair, Pairs}};
 struct NbParser;
 
 fn main() {
-
     let src: &str = "false";
     // let src: &str = "if true then true else false";
-    
+
     let p = NbParser::parse(Rule::term, &src)
         .expect("err")
         .next()
         .unwrap();
 
-    // Get the first inner pair.
-    // What kind of term is it?
-    let inner: Pairs<'_, Rule> = p.into_inner();
+    let _term = parse_term(p);
+    println!("{:#?}", _term);
 
-    // What kind of rule is the first inner pair (term)?
-    let inner_rule = inner.peek().unwrap().as_rule();
+}
 
-    // Match the rule.
-    let m = match inner_rule {
-        
-        // If it is a value, return the value.
-        Rule::value => unimplemented!(),
-        
-        // If it is a conditional, evaluate it.
-        Rule::conditional => unimplemented!(),
+fn parse_term(p: Pair<'_, Rule>) -> Term {
+    let inner_pair = p.into_inner();
+    let first_str_of_inner = inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[0];
+    match first_str_of_inner {
+        "true" => Term::TmTrue,
+        "false" => Term::TmFalse,
+        "if" => Term::TmIf(_,_,_),
+    }
+}
 
-        // None applies.
-        _ => unimplemented!()
+// fn parse_if(t: Term) -> Option(Term) {}
+
+// fn evaluate(t: Term) -> Result<Term, RuntimeError> {
+//     let r = match t {
+//         Tm
+//     }
+// }
+
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
+pub enum Term {
+    TmTrue,
+    TmFalse,
+    TmIf(Box<Term>, Box<Term>, Box<Term>),
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
+pub enum RuntimeError {
+    NoRuleApplies,
+}
+
+    // fn parse_if(&mut self) -> Option<Term> {
+    //     let cond = self.parse_term()?;
+    //     let _ = self.expect(Token::Then)?;
+    //     let csq = self.parse_term()?;
+    //     let _ = self.expect(Token::Else)?;
+    //     let alt = self.parse_term()?;
+    //     Some(Term::TmIf(Box::new(cond), Box::new(csq), Box::new(alt)))
+    // }
+
+/*
+pub fn eval1(t: Term) -> Result<Term, RuntimeError> {
+    let res = match t {
+        TmIf(cond, csq, alt) => match *cond {
+            TmFalse => *alt,
+            TmTrue => *csq,
+            _ => TmIf(Box::new(eval1(*cond)?), csq, alt),
+        },
+        _ => return Err(RuntimeError::NoRuleApplies),
     };
+    Ok(res)
+}
 
-    println!("{:#?}", m)
+pub fn eval(t: Term) -> Term {
+    let mut r = t;
+    while let Ok(tprime) = eval1(r.clone()) {
+        r = tprime;
+        if r.is_normal() {
+            break;
+        }
+    }
+    r
+}
+
+fn main() {
+    println!("λ");
+    let input = "if iszero(succ(zero)) then false else succ(4)";
+    let mut p = Parser::new(input);
+    while let Some(tm) = p.parse_term() {
+        print!("{:?} ==> ", tm);
+        println!("{:?}", eval(tm));
+    }
+}
+
+*/
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_term() {
+        let src: &str = "false";
+        // let src: &str = "if true then true else false";
+        let p = NbParser::parse(Rule::term, &src)
+            .expect("err")
+            .next()
+            .unwrap();
+
+        let term = parse_term(p);
+        assert_eq!(term, Term::TmFalse);
+    }
 }
