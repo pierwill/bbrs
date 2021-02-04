@@ -19,11 +19,10 @@ fn main() {
         .expect("err")
         .next()
         .unwrap();
-    println!("{:#?}", p);
+    // println!("{:#?}", p);
     
     let _term = parse_term(p);
     println!("{:#?}", _term);
-
 }
 
 fn parse_term(p: Pair<'_, Rule>) -> Term {
@@ -39,7 +38,6 @@ fn parse_term(p: Pair<'_, Rule>) -> Term {
 }
 
 fn parse_if(p: Pairs<'_, Rule>) -> Option<Term> {
-
     // "if cond then csq else alt"
     let conditional_str_parts = p.as_str().split_whitespace().collect::<Vec<_>>();
 
@@ -87,40 +85,28 @@ pub enum RuntimeError {
     NoRuleApplies,
 }
 
-// fn parse_if(&mut self) -> Option<Term> {
-//     let cond = self.parse_term()?;
-//     let _ = self.expect(Token::Then)?;
-//     let csq = self.parse_term()?;
-//     let _ = self.expect(Token::Else)?;
-//     let alt = self.parse_term()?;
-//     Some(Term::TmIf(Box::new(cond), Box::new(csq), Box::new(alt)))
+// pub fn eval1(t: Term) -> Result<Term, RuntimeError> {
+//     let res = match t {
+//         TmIf(cond, csq, alt) => match *cond {
+//             TmFalse => *alt,
+//             TmTrue => *csq,
+//             _ => TmIf(Box::new(eval1(*cond)?), csq, alt),
+//         },
+//         _ => return Err(RuntimeError::NoRuleApplies),
+//     };
+//     Ok(res)
 // }
 
-/*
-pub fn eval1(t: Term) -> Result<Term, RuntimeError> {
-    let res = match t {
-        TmIf(cond, csq, alt) => match *cond {
-            TmFalse => *alt,
-            TmTrue => *csq,
-            _ => TmIf(Box::new(eval1(*cond)?), csq, alt),
-        },
-        _ => return Err(RuntimeError::NoRuleApplies),
-    };
-    Ok(res)
-}
-
-pub fn eval(t: Term) -> Term {
-    let mut r = t;
-    while let Ok(tprime) = eval1(r.clone()) {
-        r = tprime;
-        if r.is_normal() {
-            break;
-        }
-    }
-    r
-}
-
-*/
+// pub fn eval(t: Term) -> Term {
+//     let mut r = t;
+//     while let Ok(tprime) = eval1(r.clone()) {
+//         r = tprime;
+//         if r.is_normal() {
+//             break;
+//         }
+//     }
+//     r
+// }
 
 #[cfg(test)]
 mod tests {
@@ -147,9 +133,7 @@ mod tests {
             .unwrap();
 
         let term = parse_if(Pairs::single(p));
-        assert_eq!(term, Some(Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse))));
+        let want = Some(Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)));
+        assert_eq!(term, want);
     }
-
-
-
 }
