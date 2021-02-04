@@ -1,0 +1,4 @@
+WHITESPACE = _{ " " }
+value = @{ "true" | "false" }
+tvar = @{ "t"~ASCII_DIGIT+ }
+term = { value | "if" ~ term ~ "then" ~ tvar ~  "else" ~  tvar }
