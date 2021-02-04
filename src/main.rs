@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use std::fmt;
+
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
@@ -19,13 +21,13 @@ fn main() {
         .expect("err")
         .next()
         .unwrap();
-    println!("{:#?}", p);
+    // println!("{:#?}", p);
     
-    let _term = parse_term(p.clone());
-    println!("{:#?}", _term);
+    // let _term = parse_term(p.clone());
+    // println!("{:#?}", _term);
 
     let t = parse_term(p);
-    println!("{:#?}", eval(t));
+    println!("{}", eval(t));
 }
 
 pub fn parse_term(p: Pair<'_, Rule>) -> Term {
@@ -80,6 +82,17 @@ impl Term {
             Term::TmTrue | Term::TmFalse => true,
             _ => false,
         }
+    }
+}
+
+impl fmt::Display for Term {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match &self {
+            Term::TmTrue => "true",
+            Term::TmFalse => "false",
+            _ => panic!("We shouldn't need to print an if.")
+        };
+        write!(f, "{}", s)
     }
 }
 
