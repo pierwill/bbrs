@@ -28,7 +28,7 @@ fn main() {
     println!("{:#?}", eval(t));
 }
 
-fn parse_term(p: Pair<'_, Rule>) -> Term {
+pub fn parse_term(p: Pair<'_, Rule>) -> Term {
     let inner_pair = p.into_inner();
     let first_str = inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[0];
 
@@ -40,7 +40,7 @@ fn parse_term(p: Pair<'_, Rule>) -> Term {
     }
 }
 
-fn parse_if(p: Pairs<'_, Rule>) -> Option<Term> {
+pub fn parse_if(p: Pairs<'_, Rule>) -> Option<Term> {
     // "if cond then csq else alt"
     let conditional_str_parts = p.as_str().split_whitespace().collect::<Vec<_>>();
 
@@ -59,7 +59,7 @@ fn parse_if(p: Pairs<'_, Rule>) -> Option<Term> {
     Some(Term::TmIf(Box::new(cond), Box::new(csq), Box::new(alt)))
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Term {
     TmTrue,
     TmFalse,
@@ -67,7 +67,7 @@ pub enum Term {
 }
 
 impl Term {
-    fn from_str(s: &str) -> Self {
+    pub fn from_str(s: &str) -> Self {
         match s {
             "true" => Term::TmTrue,
             "false" => Term::TmFalse,
