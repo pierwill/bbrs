@@ -15,7 +15,7 @@ term = { value | conditional }
 
 At the moment this project is about nine parts ambition to one part code.
 
-The idea is to produce a working, extensible interprer that'll do something like this:
+The idea is to produce a working, extensible interpreter that'll do something like this:
 
 ```
 >> true
@@ -31,7 +31,7 @@ Error!
 ```
 
 Eventually I'd like to add named variables and assignments.
-Things would look something like this:
+That language would look something like this:
 
 ```
 value = { "true" | "false" }
