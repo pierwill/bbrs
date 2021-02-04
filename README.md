@@ -1,8 +1,7 @@
 nbrs
 ====
 
-Attempt at a simple language using [`pest`](https://pest.rs),
-inspired by NB in Chapters 3 and 4 of Pierce, *Types and Programming Languages* (U of Pennsylvania Press, 2002).
+Attempt at a simple language using [`pest`](https://pest.rs), inspired by **𝔹** in Benjamin Pierce, *Types and Programming Languages* (U of Pennsylvania Press, 2002), page 34.
 
 Currently working on implementing this grammar:
 
