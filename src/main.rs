@@ -29,6 +29,37 @@ fn main() {
     println!("Input: \"{}\"\n\n{:#?}", input2, p2);
 }
 
+struct Assignment {
+    // eg "t1"
+    tvar: &str,
+    val: Value,
+}
+
+struct Term {
+    kind: TmKind,
+}
+
+enum TmKind {
+    Value,
+    Conditional,
+}
+
+enum Value {
+    TRUE,
+    FALSE,
+}
+
+// fn eval(input: &str) -> &str {
+//     let p = NbParser::parse(Rule::statement, &input)
+//         .expect("err")
+//         .next()
+//         .unwrap();
+//     let mut inner_rules = p.into_inner();
+//     // if inner_rules.next().unwrap().as_rule() == Rule::assignment {}
+//     let TT = inner_rules.next().unwrap().as_str();
+//     if TT == String::from("true") {}
+// }
+// fn assign() ->
 
 #[cfg(test)]
 mod tests {

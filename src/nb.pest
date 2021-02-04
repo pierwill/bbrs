@@ -1,6 +1,13 @@
 WHITESPACE = _{ " " }
+
 value = @{ "true" | "false" }
+
 tvar = @{ "t" ~ ASCII_DIGIT+ }
+
 assignment = { tvar ~ "=" ~ value }
-term = { value | "if" ~ tvar ~ "then" ~ tvar ~  "else" ~  tvar }
+
+conditional = { "if" ~ tvar ~ "then" ~ tvar ~  "else" ~  tvar }
+
+term = { value |  conditional }
+
 statement = { term | assignment}
