@@ -84,19 +84,30 @@ fn run_interpreter(src: &str) -> String {
 pub fn parse_term(p: Pair<'_, Rule>, mut tab: HashMap<String, String>) -> Term {
 
     let inner_pair = p.clone().into_inner();
-
+    let inner_rule = p.clone().into_inner().next().unwrap().as_rule();
     // If there's a name or an assignment, either
     // return the value of the name directly, or write the
     // name to the table.
     //
     // Example: `let x = true`
-    if p.clone().into_inner().next().unwrap().as_rule() == Rule::assignment {
+    if inner_rule == Rule::assignment {
         let (n, t) = parse_assignment(inner_pair);
         tab.insert(
             n,
             String::from(t.to_str()));
         t
+    } else if inner_rule == Rule::name {
+        let name = inner_rule.as_str();
+        // Check to see if name exists in table.
+        if tab.contains_key(name) {
+            // return the value (TmTrue or TmFalse)
+        } else {
+           Term::TmName(name)
+        }
+        
     } else {
+        
+        
         // If not a name or assignment, let's check for Ifs and values.
         let first_str = inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[0];
 
@@ -150,7 +161,7 @@ pub enum Term {
     TmFalse,
     TmIf(Box<Term>, Box<Term>, Box<Term>),
     TmAssign,
-    TmName,
+    TmName(String),
 }
 
 impl Term {
