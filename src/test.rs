@@ -1,4 +1,8 @@
-use super::*;
+use crate::term::*;
+use crate::Rule;
+use crate::NbParser;
+use pest::Parser;
+use pest::iterators::Pairs;
 
 #[test]
 fn test_parse_true() {
