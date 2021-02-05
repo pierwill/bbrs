@@ -1,13 +1,13 @@
 use crate::term::*;
 use crate::Rule;
-use crate::NbParser;
+use crate::BbParser;
 use pest::Parser;
 use pest::iterators::Pairs;
 
 #[test]
 fn test_parse_true() {
     let src: &str = "true";
-    let p = NbParser::parse(Rule::term, &src)
+    let p = BbParser::parse(Rule::term, &src)
         .expect("err")
         .next()
         .unwrap();
@@ -19,7 +19,7 @@ fn test_parse_true() {
 #[test]
 fn test_parse_false() {
     let src: &str = "false";
-    let p = NbParser::parse(Rule::term, &src)
+    let p = BbParser::parse(Rule::term, &src)
         .expect("err")
         .next()
         .unwrap();
@@ -31,7 +31,7 @@ fn test_parse_false() {
 #[test]
 fn test_parse_if() {
     let src: &str = "if true then true else false";
-    let p = NbParser::parse(Rule::term, &src)
+    let p = BbParser::parse(Rule::term, &src)
         .expect("err")
         .next()
         .unwrap();
