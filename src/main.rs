@@ -11,6 +11,7 @@
 //!```
 
 use std::fmt;
+use std::collections::HashMap;
 
 extern crate pest;
 #[macro_use]
@@ -63,6 +64,10 @@ fn main() {
 }
 
 fn run_interpreter(src: &str) -> String {
+
+    // Initialize the table.
+    let mut table: HashMap<String, String> = HashMap::new();
+
     let p = NbParser::parse(Rule::term, src)
         .expect("err")
         .next()
@@ -73,7 +78,19 @@ fn run_interpreter(src: &str) -> String {
 
 /// Takes a [`Pair`] and returns a [`Term`].
 pub fn parse_term(p: Pair<'_, Rule>) -> Term {
-    let inner_pair = p.into_inner();
+
+    let inner_pair = p.clone().into_inner();
+
+    // If there's a name or an assignment, either
+    // return the value of the name directly, or write the
+    // name to the table.
+    // let x = true
+    if p.clone().into_inner().next().unwrap().as_rule() == Rule::assignment {
+        let ass_strs = inner_pair.clone().as_str().split_whitespace().collect::<Vec<_>>();
+        let newname = ass_strs[1];
+        println!("{}", newname)
+    }
+
     let first_str = inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[0];
 
     match first_str {
@@ -82,6 +99,19 @@ pub fn parse_term(p: Pair<'_, Rule>) -> Term {
         "false" => Term::TmFalse,
         _ => panic!(),
     }
+}
+
+pub fn assign(n: String, t: Term) {
+    let val = match t {
+        Term::TmTrue => String::from("true"),
+        Term::TmFalse => String::from("false"),
+        _ => panic!()
+    };
+
+    table.insert(
+        String::from(n),
+        val,
+    );
 }
 
 /// Parse an “if” term (aka an “if statement”).
@@ -112,6 +142,8 @@ pub enum Term {
     TmTrue,
     TmFalse,
     TmIf(Box<Term>, Box<Term>, Box<Term>),
+    TmAssign,
+    TmName,
 }
 
 impl Term {

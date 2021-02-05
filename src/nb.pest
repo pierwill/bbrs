@@ -4,4 +4,8 @@ value = { "true" | "false" }
 
 conditional = { "if" ~ term ~ "then" ~ term ~ "else" ~ term  }
 
-term = { value | conditional }
+name = @{ !("let"|"if"|"then"|"else"|value) ~ "_"? ~ ASCII_ALPHA+ ~ ANY? }
+
+assignment = { "let" ~ name ~ "=" ~ value }
+
+term = { name | assignment | value | conditional }
