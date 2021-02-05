@@ -77,7 +77,7 @@ fn run_interpreter(src: &str) -> String {
         .next()
         .unwrap();
     let t = parse_term(p, table);
-    format!("{}", eval(t))
+    format!("{}", eval(t, table))
 }
 
 /// Takes a [`Pair`] and returns a [`Term`].
@@ -212,7 +212,7 @@ pub enum RuntimeError {
 }
 
 /// Evaluates a term (recursively, in the case of “if” terms).
-pub fn eval1(t: Term) -> Result<Term, RuntimeError> {
+pub fn eval1(t: Term, table: HashMap<String, String>) -> (Result<Term, RuntimeError>, HashMap<String, String>) {
     let res = match t {
         Term::TmIf(cond, csq, alt) => match *cond {
             Term::TmFalse => *alt,
@@ -221,16 +221,16 @@ pub fn eval1(t: Term) -> Result<Term, RuntimeError> {
         },
         _ => return Err(RuntimeError::NoRuleApplies),
     };
-    Ok(res)
+    (Ok(res), table)
 }
 
 /// Helper function for evaluation that breaks recursion on normal forms of terms.
 ///
 /// See `is_normal()`.
 // TODO Actually understand how this and eval1() work together conceptually.
-pub fn eval(t: Term) -> Term {
+pub fn eval(t: Term, table: HashMap<String, String>) -> Term {
     let mut r = t;
-    while let Ok(tprime) = eval1(r.clone()) {
+    while let Ok(tprime) = eval1(r.clone(), table) {
         r = tprime;
         if r.is_normal() {
             break;
