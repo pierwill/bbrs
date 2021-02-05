@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! **bb** is a Rust implementation of a very simple language described by Benjamin Pierce
 //! in *Types and Programming Languages* (University of Pennsylvania Press, 2002), page 34.
 //! There it is called 𝔹, from whence bb.
@@ -11,12 +12,15 @@
 //!```
 
 use std::fmt;
+
+#[allow(unused)]
 use std::collections::HashMap;
 
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
+#[allow(unused)]
 use pest::{Parser, iterators::{Pair, Pairs}};
 
 use rustyline::error::ReadlineError;
@@ -84,34 +88,31 @@ pub fn parse_term(p: Pair<'_, Rule>) -> Term {
     // If there's a name or an assignment, either
     // return the value of the name directly, or write the
     // name to the table.
-    // let x = true
+    // 
+    // Example: `let x = true`
     if p.clone().into_inner().next().unwrap().as_rule() == Rule::assignment {
-        let ass_strs = inner_pair.clone().as_str().split_whitespace().collect::<Vec<_>>();
-        let newname = ass_strs[1];
-        println!("{}", newname)
-    }
-
-    let first_str = inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[0];
-
-    match first_str {
-        "if" => parse_if(inner_pair).unwrap(),
-        "true" => Term::TmTrue,
-        "false" => Term::TmFalse,
-        _ => panic!(),
+        let t = parse_assignment(inner_pair).unwrap();
+        t
+    } else {
+        // If not a name or assignment, let's check for Ifs and values.
+        let first_str = inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[0];
+        
+        match first_str {
+            "if" => parse_if(inner_pair).unwrap(),
+            "true" => Term::TmTrue,
+            "false" => Term::TmFalse,
+            _ => panic!(),
+        }
     }
 }
+pub fn parse_assignment(p: Pairs<'_, Rule>) -> Option<Term> {
 
-pub fn assign(n: String, t: Term) {
-    let val = match t {
-        Term::TmTrue => String::from("true"),
-        Term::TmFalse => String::from("false"),
-        _ => panic!()
-    };
-
-    table.insert(
-        String::from(n),
-        val,
-    );
+    let pair = p.clone();
+    let ass_strs = pair.as_str().split_whitespace().collect::<Vec<_>>();
+    let _newname = String::from(ass_strs[1]);
+    let val = String::from(ass_strs[3]);
+    
+    Some(Term::from_str(&val))
 }
 
 /// Parse an “if” term (aka an “if statement”).
@@ -212,6 +213,18 @@ pub fn eval(t: Term) -> Term {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_parse_assignment() {
+        let src: &str = "let x = true";
+        let p = NbParser::parse(Rule::term, &src)
+            .expect("err")
+            .next()
+            .unwrap();
+
+        let term = parse_term(p);
+        assert_eq!(term, Term::TmTrue);
+    }
 
     #[test]
     fn test_parse_true() {
