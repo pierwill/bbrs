@@ -70,33 +70,36 @@ fn main() {
 fn run_interpreter(src: &str) -> String {
 
     // Initialize the table.
-    let mut table: HashMap<String, String> = HashMap::new();
+    let table: HashMap<String, String> = HashMap::new();
 
     let p = NbParser::parse(Rule::term, src)
         .expect("err")
         .next()
         .unwrap();
-    let t = parse_term(p);
+    let t = parse_term(p, table);
     format!("{}", eval(t))
 }
 
 /// Takes a [`Pair`] and returns a [`Term`].
-pub fn parse_term(p: Pair<'_, Rule>) -> Term {
+pub fn parse_term(p: Pair<'_, Rule>, mut tab: HashMap<String, String>) -> Term {
 
     let inner_pair = p.clone().into_inner();
 
     // If there's a name or an assignment, either
     // return the value of the name directly, or write the
     // name to the table.
-    // 
+    //
     // Example: `let x = true`
     if p.clone().into_inner().next().unwrap().as_rule() == Rule::assignment {
-        let t = parse_assignment(inner_pair).unwrap();
+        let (n, t) = parse_assignment(inner_pair);
+        tab.insert(
+            n,
+            String::from(t.to_str()));
         t
     } else {
         // If not a name or assignment, let's check for Ifs and values.
         let first_str = inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[0];
-        
+
         match first_str {
             "if" => parse_if(inner_pair).unwrap(),
             "true" => Term::TmTrue,
@@ -105,14 +108,17 @@ pub fn parse_term(p: Pair<'_, Rule>) -> Term {
         }
     }
 }
-pub fn parse_assignment(p: Pairs<'_, Rule>) -> Option<Term> {
+pub fn parse_assignment(p: Pairs<'_, Rule>) -> (String, Term) {
 
     let pair = p.clone();
     let ass_strs = pair.as_str().split_whitespace().collect::<Vec<_>>();
-    let _newname = String::from(ass_strs[1]);
+    let newname = String::from(ass_strs[1]);
     let val = String::from(ass_strs[3]);
-    
-    Some(Term::from_str(&val))
+
+    (
+        newname,
+        Term::from_str(&val)
+    )
 }
 
 /// Parse an “if” term (aka an “if statement”).
@@ -153,6 +159,14 @@ impl Term {
         match s {
             "true" => Term::TmTrue,
             "false" => Term::TmFalse,
+            _ => panic!(),
+        }
+    }
+
+    pub fn to_str(&self) -> &str {
+        match &self {
+            Term::TmTrue => "true",
+            Term::TmFalse => "false",
             _ => panic!(),
         }
     }
