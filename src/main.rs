@@ -16,7 +16,10 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
-use pest::{Parser, iterators::{Pair, Pairs}};
+use pest::{
+    iterators::{Pair, Pairs},
+    Parser,
+};
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
@@ -43,18 +46,18 @@ fn main() {
 
                 let output = run_interpreter(&line);
                 println!("{}", output);
-            },
+            }
             Err(ReadlineError::Interrupted) => {
                 println!("CTRL-C");
-                break
-            },
+                break;
+            }
             Err(ReadlineError::Eof) => {
                 println!("CTRL-D");
-                break
-            },
+                break;
+            }
             Err(err) => {
                 println!("Error: {:?}", err);
-                break
+                break;
             }
         }
     }
@@ -90,27 +93,35 @@ pub fn parse_term(p: Pair<'_, Rule>) -> Term {
 pub fn parse_if(p: Pairs<'_, Rule>) -> Term {
     //   0     1       2       3      4       5
     // ["if", "cond", "then", "csq", "else", "alt"]
-    let conditional_str_parts: Vec<&str> = p.clone().as_str().split_whitespace().collect::<Vec<_>>();
+    let conditional_str_parts: Vec<&str> =
+        p.clone().as_str().split_whitespace().collect::<Vec<_>>();
 
-    if conditional_str_parts[1] == "if" ||
-        conditional_str_parts[3] == "if" ||
-        conditional_str_parts[5] == "if" {
-            panic!("We have an iffy-within-iffy situation.")
-        }
+    if conditional_str_parts[1] == "if"
+        || conditional_str_parts[3] == "if"
+        || conditional_str_parts[5] == "if"
+    {
+        println!("We have an iffy-within-iffy situation.");
+        let s = p.as_str();
 
+        // Ah! Okay. We need to get the right inner Pair.
+        println!("{}", s);
+        Term::from_str(s);
+    }
+
+    // Handle regular old if statements.
     let cond = Term::from_str(
         // handle if cond is a conditional?
-        conditional_str_parts[1]
+        conditional_str_parts[1],
     );
     debug_assert_eq!(conditional_str_parts[2], "then");
     let csq = Term::from_str(
         // handle if csq is a conditional?
-        conditional_str_parts[3]
+        conditional_str_parts[3],
     );
     debug_assert_eq!(conditional_str_parts[4], "else");
     let alt = Term::from_str(
         // handle if alt is a conditional?
-        conditional_str_parts[5]
+        conditional_str_parts[5],
     );
 
     Term::TmIf(Box::new(cond), Box::new(csq), Box::new(alt))
@@ -126,16 +137,17 @@ pub enum Term {
 
 impl Term {
     // Hack to get boolean normal terms from their string representations.
+    #[rustfmt::skip]
     pub fn from_str(s: &str) -> Self {
         match s {
             "true" => Term::TmTrue,
             "false" => Term::TmFalse,
             "if true then true else true" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmTrue)),
-            // "if true then true else false" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)), 
-            // "if true then false else true" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)),
-            // "if false then true else true" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)),
-            // "if false then true else false" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)),
-            // "if false then false else false" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)),
+            "if true then true else false" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)),
+            "if true then false else true" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmFalse), Box::new(Term::TmTrue)),
+            "if false then true else true" => Term::TmIf(Box::new(Term::TmFalse), Box::new(Term::TmTrue), Box::new(Term::TmTrue)),
+            "if false then true else false" => Term::TmIf(Box::new(Term::TmFalse), Box::new(Term::TmTrue), Box::new(Term::TmFalse)),
+            "if false then false else false" => Term::TmIf(Box::new(Term::TmFalse), Box::new(Term::TmFalse), Box::new(Term::TmFalse)),
             _ => panic!(),
         }
     }
@@ -154,7 +166,7 @@ impl fmt::Display for Term {
         let s = match &self {
             Term::TmTrue => "true",
             Term::TmFalse => "false",
-            _ => panic!("We shouldn't need to print an if.")
+            _ => panic!("We shouldn't need to print an if."),
         };
         write!(f, "{}", s)
     }
@@ -230,7 +242,11 @@ mod tests {
             .unwrap();
 
         let term = parse_if(Pairs::single(p));
-        let want = Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse));
+        let want = Term::TmIf(
+            Box::new(Term::TmTrue),
+            Box::new(Term::TmTrue),
+            Box::new(Term::TmFalse),
+        );
         assert_eq!(term, want);
     }
 
@@ -243,11 +259,15 @@ mod tests {
             .unwrap();
 
         let term = parse_if(Pairs::single(p));
-        let want =
-            Term::TmIf(Box::new(Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmTrue))),
-                       Box::new(Term::TmTrue),
-                       Box::new(Term::TmFalse));
+        let want = Term::TmIf(
+            Box::new(Term::TmIf(
+                Box::new(Term::TmTrue),
+                Box::new(Term::TmTrue),
+                Box::new(Term::TmTrue),
+            )),
+            Box::new(Term::TmTrue),
+            Box::new(Term::TmFalse),
+        );
         assert_eq!(term, want);
     }
-
 }
