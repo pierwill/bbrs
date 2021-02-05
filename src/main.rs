@@ -88,8 +88,15 @@ pub fn parse_term(p: Pair<'_, Rule>) -> Term {
 ///
 /// See <https://github.com/lazear/types-and-programming-languages/blob/master/01_arith/src/parser.rs#L54-L61>
 pub fn parse_if(p: Pairs<'_, Rule>) -> Term {
+    //   0     1       2       3      4       5
     // ["if", "cond", "then", "csq", "else", "alt"]
-    let conditional_str_parts = p.as_str().split_whitespace().collect::<Vec<_>>();
+    let conditional_str_parts: Vec<&str> = p.clone().as_str().split_whitespace().collect::<Vec<_>>();
+
+    if conditional_str_parts[1] == "if" ||
+        conditional_str_parts[3] == "if" ||
+        conditional_str_parts[5] == "if" {
+            panic!("We have an iffy-within-iffy situation.")
+        }
 
     let cond = Term::from_str(
         // handle if cond is a conditional?
