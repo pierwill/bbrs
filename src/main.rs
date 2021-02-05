@@ -95,19 +95,21 @@ pub fn parse_term(p: Pair<'_, Rule>, mut tab: HashMap<String, String>) -> Term {
         tab.insert(
             n,
             String::from(t.to_str()));
+        println!("{:#?}", tab);
         t
     } else if inner_rule == Rule::name {
-        let name = inner_rule.as_str();
+        let name = String::from(
+            inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[3]
+        );
         // Check to see if name exists in table.
-        if tab.contains_key(name) {
-            // return the value (TmTrue or TmFalse)
+        if tab.contains_key(&name) {
+            // Return the value (TmTrue or TmFalse)
+            // associated with the name.
+            Term::from_str(tab.get(&name).unwrap())
         } else {
            Term::TmName(name)
         }
-        
     } else {
-        
-        
         // If not a name or assignment, let's check for Ifs and values.
         let first_str = inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[0];
 
@@ -120,8 +122,10 @@ pub fn parse_term(p: Pair<'_, Rule>, mut tab: HashMap<String, String>) -> Term {
     }
 }
 pub fn parse_assignment(p: Pairs<'_, Rule>) -> (String, Term) {
-
+    
     let pair = p.clone();
+
+    // `let x = true`
     let ass_strs = pair.as_str().split_whitespace().collect::<Vec<_>>();
     let newname = String::from(ass_strs[1]);
     let val = String::from(ass_strs[3]);
