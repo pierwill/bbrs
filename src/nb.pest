@@ -2,6 +2,6 @@ WHITESPACE = _{ " " }
 
 value = { "true" | "false" }
 
-conditional = { "if" ~ term ~ "then" ~ term ~  "else" ~ term  }
+conditional = { "if" ~ term ~ "then" ~ term ~ "else" ~ term  }
 
 term = { value | conditional }
