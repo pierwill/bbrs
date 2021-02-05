@@ -1,4 +1,4 @@
-nbrs
+bbrs
 ====
 
 Attempt at implementing a simple language in Rust using [`pest`](https://pest.rs).

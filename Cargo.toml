@@ -1,5 +1,5 @@
 [package]
-name = "nbrs"
+name = "bbrs"
 version = "0.1.0"
 authors = ["pierwill <pierwill@users.noreply.github.com>"]
 edition = "2018"
