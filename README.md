@@ -32,15 +32,16 @@ Eventually I'd like to add named variables and assignments.
 Things would look something like this:
 
 ```
+WHITESPACE = _{ " " }
 value = { "true" | "false" }
-conditional = { "if" ~ term ~ "then" ~ term ~  "else" ~ term  }
-var = @{ "$" ~ ASCII_DIGIT+ }
-assignment = { var ~ "=" ~ value }
-term = { value | conditional | assignment | var }
+conditional = { "if" ~ term ~ "then" ~ term ~ "else" ~ term  }
+name = @{ !("let"|"if"|"then"|"else"|value) ~ "_"? ~ ASCII_ALPHA+ ~ ANY? }
+assignment = { "let" ~ name ~ "=" ~ value }
+term = { name | assignment | value | conditional }
 ```
 
 N.B.:
-These are the [parsing expression grammars](https://en.wikipedia.org/wiki/Parsing_expression_grammar), used by `pest`,
+These are [parsing expression grammars](https://en.wikipedia.org/wiki/Parsing_expression_grammar) as used by `pest`,
 not [Extended Backus–Naur form](https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form).
 
 References
