@@ -77,7 +77,7 @@ pub fn parse_term(p: Pair<'_, Rule>) -> Term {
     let first_str = inner_pair.as_str().split_whitespace().collect::<Vec<_>>()[0];
 
     match first_str {
-        "if" => parse_if(inner_pair).unwrap(),
+        "if" => parse_if(inner_pair),
         "true" => Term::TmTrue,
         "false" => Term::TmFalse,
         _ => panic!(),
@@ -87,23 +87,26 @@ pub fn parse_term(p: Pair<'_, Rule>) -> Term {
 /// Parse an “if” term (aka an “if statement”).
 ///
 /// See <https://github.com/lazear/types-and-programming-languages/blob/master/01_arith/src/parser.rs#L54-L61>
-pub fn parse_if(p: Pairs<'_, Rule>) -> Option<Term> {
-    // "if cond then csq else alt"
+pub fn parse_if(p: Pairs<'_, Rule>) -> Term {
+    // ["if", "cond", "then", "csq", "else", "alt"]
     let conditional_str_parts = p.as_str().split_whitespace().collect::<Vec<_>>();
 
     let cond = Term::from_str(
+        // handle if cond is a conditional?
         conditional_str_parts[1]
     );
     debug_assert_eq!(conditional_str_parts[2], "then");
     let csq = Term::from_str(
+        // handle if csq is a conditional?
         conditional_str_parts[3]
     );
     debug_assert_eq!(conditional_str_parts[4], "else");
     let alt = Term::from_str(
+        // handle if alt is a conditional?
         conditional_str_parts[5]
     );
 
-    Some(Term::TmIf(Box::new(cond), Box::new(csq), Box::new(alt)))
+    Term::TmIf(Box::new(cond), Box::new(csq), Box::new(alt))
 }
 
 /// A term in the grammar.
@@ -120,6 +123,12 @@ impl Term {
         match s {
             "true" => Term::TmTrue,
             "false" => Term::TmFalse,
+            "if true then true else true" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmTrue)),
+            // "if true then true else false" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)), 
+            // "if true then false else true" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)),
+            // "if false then true else true" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)),
+            // "if false then true else false" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)),
+            // "if false then false else false" => Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)),
             _ => panic!(),
         }
     }
@@ -214,7 +223,24 @@ mod tests {
             .unwrap();
 
         let term = parse_if(Pairs::single(p));
-        let want = Some(Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)));
+        let want = Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse));
         assert_eq!(term, want);
     }
+
+    #[test]
+    fn test_parse_if_if() {
+        let src: &str = "if if true then true else false then true else false";
+        let p = NbParser::parse(Rule::term, &src)
+            .expect("err")
+            .next()
+            .unwrap();
+
+        let term = parse_if(Pairs::single(p));
+        let want =
+            Term::TmIf(Box::new(Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmTrue))),
+                       Box::new(Term::TmTrue),
+                       Box::new(Term::TmFalse));
+        assert_eq!(term, want);
+    }
+
 }
