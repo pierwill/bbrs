@@ -10,15 +10,14 @@
 //!term = { value | conditional }
 //!```
 
-mod term;
-use term::Term;
-
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
-use pest::Parser;
+mod term;
 
+use term::Term;
+use pest::Parser;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 

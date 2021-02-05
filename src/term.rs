@@ -2,8 +2,7 @@ extern crate pest;
 
 use std::fmt;
 
-use pest::{iterators::{Pair, Pairs}};
-
+use pest::iterators::{Pair, Pairs};
 use crate::Rule;
 
 /// Takes a [`Pair`] and returns a [`Term`].
