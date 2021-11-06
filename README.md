@@ -1,7 +1,9 @@
+[![Rust](https://github.com/pierwill/bbrs/actions/workflows/rust.yml/badge.svg)](https://github.com/pierwill/bbrs/actions/workflows/rust.yml)
+
 bbrs
 ====
 
-Attempt at implementing a simple language in Rust using [`pest`](https://pest.rs).
+`bbrs` implements a simple language from Pierce's TAPL in Rust using [`pest`](https://pest.rs).
 
 Based on **𝔹** in Benjamin Pierce, *Types and Programming Languages* (U of Pennsylvania Press, 2002), page 34.
 
