@@ -13,7 +13,7 @@ fn test_parse_true() {
         .unwrap();
 
     let term = parse_term(p);
-    assert_eq!(term, Term::TmTrue);
+    assert_eq!(term, Term::True);
 }
 
 #[test]
@@ -25,7 +25,7 @@ fn test_parse_false() {
         .unwrap();
 
     let term = parse_term(p);
-    assert_eq!(term, Term::TmFalse);
+    assert_eq!(term, Term::False);
 }
 
 #[test]
@@ -37,6 +37,6 @@ fn test_parse_if() {
         .unwrap();
 
     let term = parse_if(Pairs::single(p));
-    let want = Some(Term::TmIf(Box::new(Term::TmTrue), Box::new(Term::TmTrue), Box::new(Term::TmFalse)));
+    let want = Some(Term::If(Box::new(Term::True), Box::new(Term::True), Box::new(Term::False)));
     assert_eq!(term, want);
 }

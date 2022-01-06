@@ -79,10 +79,10 @@ pub enum RuntimeError {
 /// Evaluates a term (recursively, in the case of “if” terms).
 pub fn eval1(t: Term) -> Result<Term, RuntimeError> {
     let res = match t {
-        Term::TmIf(cond, csq, alt) => match *cond {
-            Term::TmFalse => *alt,
-            Term::TmTrue => *csq,
-            _ => Term::TmIf(Box::new(eval1(*cond)?), csq, alt),
+        Term::If(cond, csq, alt) => match *cond {
+            Term::False => *alt,
+            Term::True => *csq,
+            _ => Term::If(Box::new(eval1(*cond)?), csq, alt),
         },
         _ => return Err(RuntimeError::NoRuleApplies),
     };
